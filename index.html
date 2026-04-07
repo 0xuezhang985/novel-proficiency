@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>万物熟练度</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #f5f0e8;
+  --text: #333;
+  --text-secondary: #888;
+  --accent: #b8860b;
+  --card-bg: #fff;
+  --border: #e0d8c8;
+  --shadow: rgba(0,0,0,0.06);
+}
+
+.dark {
+  --bg: #1a1a1a;
+  --text: #ccc;
+  --text-secondary: #666;
+  --accent: #d4a24e;
+  --card-bg: #242424;
+  --border: #333;
+  --shadow: rgba(0,0,0,0.3);
+}
+
+body {
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.3s, color 0.3s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ===== 书架页 ===== */
+.bookshelf {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px 16px;
+  min-height: 100vh;
+}
+
+.bookshelf-header {
+  text-align: center;
+  padding: 40px 0 30px;
+  position: relative;
+}
+
+/* ===== 夜间模式开关 ===== */
+.night-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 300;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text);
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px var(--shadow);
+  transition: background 0.3s, border-color 0.3s;
+  line-height: 1;
+}
+
+.night-toggle:active { opacity: 0.7; }
+
+.bookshelf-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 4px;
+}
+
+.bookshelf-header .subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
+
+.book-info {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 12px var(--shadow);
+  margin-bottom: 20px;
+}
+
+.book-info .tag {
+  display: inline-block;
+  font-size: 12px;
+  background: var(--accent);
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+}
+
+.book-info .desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+.book-info .continue-btn {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.book-info .continue-btn:active { opacity: 0.8; }
+
+.chapter-list {
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px var(--shadow);
+  overflow: hidden;
+}
+
+.chapter-list-title {
+  font-size: 16px;
+  font-weight: 600;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.chapter-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.chapter-item:last-child { border-bottom: none; }
+.chapter-item:active { background: var(--border); }
+
+.chapter-item .ch-title {
+  font-size: 15px;
+  flex: 1;
+}
+
+.chapter-item .ch-read {
+  font-size: 12px;
+  color: var(--accent);
+  margin-left: 8px;
+  white-space: nowrap;
+}
+
+/* ===== 阅读页 ===== */
+.reader {
+  display: none;
+  max-width: 600px;
+  margin: 0 auto;
+  min-height: 100vh;
+  position: relative;
+}
+
+.reader-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  transition: transform 0.3s;
+}
+
+.reader-topbar.hidden { transform: translateY(-100%); }
+
+.back-btn {
+  background: none;
+  border: none;
+  font-size: 15px;
+  color: var(--accent);
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.reader-topbar .ch-name {
+  font-size: 14px;
+  color: var(--text-secondary);
+  flex: 1;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0 12px;
+}
+
+.reader-content {
+  padding: 20px 18px 100px;
+}
+
+.reader-content h2 {
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 28px;
+  color: var(--accent);
+}
+
+.reader-content p {
+  font-size: 17px;
+  line-height: 1.9;
+  text-indent: 2em;
+  margin-bottom: 12px;
+}
+
+.reader-content p.system-text {
+  text-indent: 0;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.reader-content .separator {
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 28px 0;
+  letter-spacing: 8px;
+}
+
+.reader-content .end-mark {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+/* ===== 底部导航 ===== */
+.reader-bottombar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 600px;
+  background: var(--card-bg);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 10px 0;
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+  z-index: 100;
+  transition: transform 0.3s;
+}
+
+.reader-bottombar.hidden { transform: translate(-50%, 100%); }
+
+.nav-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: var(--text);
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.nav-btn:active { background: var(--border); }
+.nav-btn:disabled { color: var(--text-secondary); opacity: 0.4; }
+
+/* ===== 设置面板 ===== */
+.settings-panel {
+  display: none;
+  position: fixed;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 568px;
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 -4px 20px var(--shadow);
+  padding: 20px;
+  z-index: 200;
+}
+
+.settings-panel.show { display: block; }
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.setting-row:last-child { margin-bottom: 0; }
+
+.setting-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.setting-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.size-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.size-btn:active { background: var(--border); }
+
+.size-value {
+  font-size: 14px;
+  min-width: 30px;
+  text-align: center;
+}
+
+.theme-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+
+.theme-btn.active { border-color: var(--accent); }
+.theme-btn[data-theme="light"] { background: #f5f0e8; }
+.theme-btn[data-theme="dark"] { background: #1a1a1a; }
+.theme-btn[data-theme="green"] { background: #c7edcc; }
+.theme-btn[data-theme="blue"] { background: #d4e4f7; }
+
+/* ===== 主题色 ===== */
+.green {
+  --bg: #c7edcc;
+  --text: #2d3a2e;
+  --text-secondary: #6a7d6b;
+  --card-bg: #d8f2db;
+  --border: #b3d9b7;
+  --shadow: rgba(0,0,0,0.06);
+}
+
+.blue {
+  --bg: #d4e4f7;
+  --text: #2a3545;
+  --text-secondary: #6a7d94;
+  --card-bg: #e0ecf8;
+  --border: #bdd0e8;
+  --shadow: rgba(0,0,0,0.06);
+}
+
+/* ===== 进度条 ===== */
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: var(--accent);
+  z-index: 999;
+  transition: width 0.1s;
+}
+
+/* ===== 滚动条 ===== */
+::-webkit-scrollbar { width: 0; }
+
+@media (min-width: 601px) {
+  .bookshelf, .reader { max-width: 600px; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- ===== 夜间模式按钮 ===== -->
+<button class="night-toggle" id="nightToggle" onclick="toggleNight()" aria-label="切换夜间模式">
+  <span id="nightIcon">🌙</span>
+</button>
+
+<!-- ===== 书架页 ===== -->
+<div class="bookshelf" id="bookshelf">
+  <div class="bookshelf-header">
+    <h1>万物熟练度</h1>
+    <div class="subtitle">都市 / 系统 / 逆袭</div>
+  </div>
+
+  <div class="book-info">
+    <span class="tag">连载中</span>
+    <div class="desc">
+      林远，24岁，快递分拣员，月薪四千。某天深夜，一个名为"万物熟练度"的系统悄然觉醒——他的每一个行为都被量化为可见的熟练度数值，反复练习即可提升，没有上限。从此，削苹果、搬包裹、做俯卧撑……每一次不起眼的重复，都成了通往蜕变的阶梯。
+    </div>
+    <button class="continue-btn" id="continueBtn" onclick="continueReading()">继续阅读</button>
+  </div>
+
+  <div class="chapter-list">
+    <div class="chapter-list-title">目录</div>
+    <div id="chapterListContainer"></div>
+  </div>
+</div>
+
+<!-- ===== 阅读页 ===== -->
+<div class="reader" id="reader">
+  <div class="reader-topbar" id="topbar">
+    <button class="back-btn" onclick="goBack()">← 返回</button>
+    <span class="ch-name" id="readerChName"></span>
+    <span style="width:50px"></span>
+  </div>
+
+  <div class="reader-content" id="readerContent"></div>
+
+  <div class="reader-bottombar" id="bottombar">
+    <button class="nav-btn" id="prevBtn" onclick="prevChapter()">上一章</button>
+    <button class="nav-btn" onclick="toggleSettings()">设置</button>
+    <button class="nav-btn" id="nextBtn" onclick="nextChapter()">下一章</button>
+  </div>
+
+  <div class="settings-panel" id="settingsPanel">
+    <div class="setting-row">
+      <span class="setting-label">字号</span>
+      <div class="setting-controls">
+        <button class="size-btn" onclick="changeFontSize(-1)">−</button>
+        <span class="size-value" id="fontSizeVal">17</span>
+        <button class="size-btn" onclick="changeFontSize(1)">+</button>
+      </div>
+    </div>
+    <div class="setting-row">
+      <span class="setting-label">背景</span>
+      <div class="setting-controls">
+        <button class="theme-btn active" data-theme="light" onclick="setTheme('light')"></button>
+        <button class="theme-btn" data-theme="dark" onclick="setTheme('dark')"></button>
+        <button class="theme-btn" data-theme="green" onclick="setTheme('green')"></button>
+        <button class="theme-btn" data-theme="blue" onclick="setTheme('blue')"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== 章节数据 =====
+const chapters = [
+{
+  title: "第一章 系统觉醒",
+  content: `林远觉得自己这辈子就这样了。
+
+二十四岁，大专毕业两年，在城东一家快递站点当分拣员。每天早上六点起床，晚上九点回到那间月租八百的隔断房，累得连泡面都不想泡。
+
+他不是没努力过。
+
+高中时拼命刷题，差本科线十一分。复读一年，差了八分。家里拿不出第二年复读的钱，他去读了大专，学了个"物流管理"。毕业后投了两百多份简历，面试了三十几家公司，最后还是回到了快递站。
+
+不是他不够聪明，也不是他不够勤奋。他只是……普通。
+
+普通到任何事情都比别人慢半拍。别人三天能上手的业务，他要一周。别人随便练练就能过的驾照科目二，他挂了三次。高中同桌随手翻翻书就能考前十，他把课本翻烂了还是中游偏下。
+
+周五晚上九点半，林远拖着酸痛的身体回到出租屋。
+
+今天他搬了一千二百多个包裹。手指上的胶带残胶洗了三遍还是黏糊糊的，腰像是被人打了一锤子。他把外套扔在床上，整个人倒进那张吱呀作响的折叠床里。
+
+手机亮了。
+
+是高中班级群。他本来不想看，但手指划开了屏幕。
+
+"陈嘉豪刚拿了B轮融资，估值两个亿，牛逼啊！"
+
+下面一串恭喜。
+
+陈嘉豪。高中时坐他后排的男生，上课打游戏，考试照样前五。后来去了985，大三开始创业，现在已经是"青年企业家"。
+
+林远盯着屏幕看了几秒，退出了群聊。
+
+不是嫉妒。是那种更深的东西——一种从骨头里渗出来的无力感。就像你站在一条传送带上，拼命跑，脚下的带子却在往后退，你永远跑不到前面去。
+
+他闭上眼。
+
+然后头痛开始了。
+
+不是普通的头痛，是像有什么东西在颅骨内壁上用指甲刮，从后脑勺一直刮到眉心。林远"嘶"了一声，猛地坐起来，双手抱住脑袋。
+
+疼痛持续了大概十几秒，然后戛然而止。
+
+取而代之的，是一行半透明的淡蓝色文字，悬浮在他视野正中央。
+
+【万物熟练度系统已激活】
+
+林远愣了。
+
+他眨了眨眼。那行字还在。
+
+他伸手去碰——手指穿过了文字，什么也摸不到。
+
+"我他妈不会是脑子出问题了吧？"
+
+话音刚落，又一行字弹出来：
+
+【宿主状态正常。系统初始化完成。】
+
+【核心能力：万物皆可量化。宿主的一切行为、技能、知识，均可转化为可视化的熟练度数值。熟练度提升无上限。】
+
+林远坐在床边，一动不动地盯着虚空中的蓝色文字。
+
+他的第一反应不是兴奋，而是恐惧。这要么是幻觉，要么是脑瘤。他掏出手机，打开搜索引擎，输入"突然出现幻觉 看到文字"。
+
+搜索结果加载的瞬间，视野边缘跳出了一个小小的提示：
+
+【检测到行为：信息检索】
+【信息检索 Lv.1 — 0/100】
+【+1 熟练度】
+
+林远的手指停在了屏幕上。
+
+他又搜了一条。
+
+【信息检索 Lv.1 — 2/100】
+【+1 熟练度】
+
+他深吸一口气，放下手机。
+
+好。就算是幻觉，这个幻觉也太有条理了。他决定做一个实验。
+
+林远站起来，走到那张充当餐桌的折叠桌前。桌上放着一把水果刀和两个苹果——昨天超市打折买的。
+
+他拿起刀，开始削苹果。
+
+【检测到行为：刀具操作（削皮）】
+【刀具操作 Lv.1 — 0/200】
+【+1 熟练度】
+
+果皮断了。他削苹果一直很烂，每次都是坑坑洼洼。
+
+他继续削。第二刀，+1。第三刀，+1。
+
+削完一个苹果，熟练度涨到了12。苹果被他削得像个被狗啃过的土豆。
+
+他开始削第二个。
+
+到第二个苹果削完的时候，熟练度变成了23。他低头看了看手里的苹果——仍然丑，但至少比第一个好一点。皮薄了一些，没有之前那么多深坑。
+
+但这也可能是心理作用。
+
+林远把苹果放下，站到房间中央。隔断房只有六平米，站在中间伸开手臂，两侧都快碰到墙。
+
+他开始做俯卧撑。
+
+【检测到行为：俯卧撑】
+【俯卧撑 Lv.1 — 0/50】
+【+1 熟练度】
+
+一个。两个。三个。
+
+每做一个，跳一次提示。
+
+他平时的极限是十五个。到第十三个的时候手臂开始发抖，第十五个勉强撑起来，第十六个——
+
+撑不起来了。
+
+他趴在地上喘气，看了眼面板：
+
+【俯卧撑 Lv.1 — 15/50】
+
+没有因为有了系统就突然变成超人。该做不动还是做不动。
+
+这反而让林远安心了一点。如果做了一个俯卧撑就能飞天，那一定是幻觉。但这个系统似乎只是在忠实地记录——他做了什么，做了多少，然后把这些变成一个数字。
+
+他坐起来，靠着墙，开始认真地阅读系统界面。
+
+他发现只要在心里默念"面板"，就能调出一个完整的状态页面：
+
+——
+
+【林远 — 个人面板】
+
+信息检索 Lv.1 — 2/100
+刀具操作 Lv.1 — 23/200
+俯卧撑 Lv.1 — 15/50
+
+——
+
+就这三个。少得可怜。
+
+但林远注意到一个细节——每个技能升级所需的熟练度不同。信息检索需要100，刀具操作需要200，俯卧撑只需要50。
+
+这意味着什么？
+
+越简单的动作，越快升级？还是说，越接近纯体力的行为，门槛越低？
+
+他试着又做了一个俯卧撑。手臂酸得发颤，但硬撑了起来。
+
+【俯卧撑 Lv.1 — 16/50】
+
+他看着那个数字，突然意识到一件事。
+
+这个系统没有给他任何外挂。它没有让他变强，没有给他超能力，没有在他身体里灌注什么神秘能量。
+
+它只做了一件事——把"进步"变得看得见了。
+
+对大多数人来说，努力是模糊的。你不知道今天跑的五公里对明天有多少帮助，你不知道背的这篇课文下次考试能不能用上。所以很多人放弃了，因为看不到反馈。
+
+但现在，他的每一次努力，都有一个数字在跳动。
+
+每一次都算数。
+
+林远直愣愣地坐在地板上，盯着那三行简陋的技能面板。房间很小，灯光昏黄，墙上有一片渗水的霉斑，隔壁传来外卖综艺节目的笑声。
+
+一切都跟十分钟前一样。他还是那个月薪四千的快递分拣员，住在六平米的隔断房里，高中同学融资两个亿，而他连苹果都削不好。
+
+但有什么东西不一样了。
+
+他说不清楚那是什么。可能是一种很久没有过的感觉——上一次有这种感觉，也许是高三那年，他真的相信自己只要再努力一点就能考上本科的时候。
+
+他低头看了看自己的手。满是胶带残胶和快递箱留下的纸皮划痕。
+
+然后他重新趴到地上，开始做第十七个俯卧撑。
+
+【俯卧撑 Lv.1 — 17/50】
+
+还差三十三个。
+
+他想知道，升到Lv.2的时候，会发生什么。`
+},
+{
+  title: "第二章 每一次都算数",
+  content: `林远那天晚上没怎么睡好。
+
+不是因为失眠，而是因为他每隔二十分钟就忍不住在心里默念一次"面板"。那三行淡蓝色的文字每次都安安静静地浮现出来，像一个不会说谎的记事本。
+
+【俯卧撑 Lv.1 — 21/50】
+
+睡前他又多做了四个。手臂已经完全不听使唤了，最后那个与其说是俯卧撑，不如说是整个人哆嗦着从地板上蠕动起来。但数字跳了，21。
+
+凌晨两点，他盯着天花板上一道细细的裂缝，脑子里全是问题。
+
+系统是从哪来的？为什么选中了他？有没有别人也有？升级之后到底会怎样？"无上限"是什么概念？如果俯卧撑练到Lv.100，他会变成什么——人形起重机？
+
+但最让他反复咀嚼的，是那条最基本的规则：一切行为都可以量化。
+
+一切。
+
+那"睡觉"算不算？"呼吸"算不算？"思考"算不算？
+
+他试着在心里想了一下"呼吸"这个概念，然后深深吸了一口气，又缓缓呼出来。
+
+什么也没发生。
+
+没有提示，没有蓝字。
+
+他又试了一次，这次刻意放慢了节奏，用鼻子吸气四秒，屏住两秒，再用嘴缓缓呼出六秒。
+
+还是没有。
+
+他想了想，翻了个身。
+
+也许系统不是对所有行为都响应的。呼吸太本能了，像心跳一样，可能不被算作"技能"。或者，触发条件不只是"做了某个动作"，而是需要某种程度的——专注？主动性？
+
+又一个问题加进了他脑子里那个越来越长的清单。
+
+他决定不再想了。明天还要六点起。
+
+闹钟响的时候，林远觉得自己好像刚闭上眼。
+
+窗外还是黑的。四月初的清晨，空气里有一股潮湿的凉意。他摸黑穿衣服，在那个只有半平米的洗手间洗了把脸，灌了一杯凉白开，啃了两口昨天剩的馒头。
+
+出门前，他习惯性地在心里念了一声"面板"。
+
+三行字安静地浮在视野中。数字跟昨晚一模一样，没有偷偷涨，也没有莫名其妙地掉。
+
+林远把门锁好，骑上那辆二手电动车，汇入了清晨还算空旷的街道。
+
+===
+
+快递站在城东的一条小巷子里，两层铁皮棚子，夏天像蒸笼，冬天像冰窖。现在是四月，温度刚好卡在不冷不热的尴尬地带，穿短袖嫌凉，穿外套干活又热。
+
+林远到的时候是五点五十。站里已经有人了。
+
+"哟，小林来了。"
+
+说话的是老周，四十七岁，干了八年快递，站里资历最老的分拣员。他正蹲在门口抽烟，烟雾在路灯底下绕了一圈才散开。
+
+"周哥早。"
+
+"今天货多，昨晚上到了两车。"老周吐了口烟，往棚子里面努了努嘴，"赵哥说争取十点前分完。"
+
+林远往里一看，果然，分拣区的地面上堆满了包裹，像一座座小山丘。蓝色的、黄色的、灰色的编织袋堆得比人还高，中间的过道窄得只容一个人侧身通过。
+
+他没多说什么，把外套挂在墙上的钉子上，戴上手套，走进了包裹堆里。
+
+分拣的活儿不复杂，但也不是随便就能干好的。
+
+每个包裹上都有面单，面单上有地址。你要根据地址把包裹扔到对应的区域格口里。城东十二个网点，每个网点覆盖几条街道，你得记住哪条街归哪个网点。
+
+林远拿起第一个包裹。
+
+长方形纸箱，不算重，大概三四斤。他翻到面单那一面——"朝阳路188号，锦绣花园6栋"。
+
+城东三号网点的区域。他把包裹扔进三号格口。
+
+【检测到行为：包裹分拣】
+【包裹分拣 Lv.1 — 0/300】
+【+1 熟练度】
+
+林远的动作顿了一下。
+
+他等着这一刻呢。但当那行蓝色文字真的弹出来的时候，他还是感到了一种微妙的震动。
+
+这不是游戏。这是他的工作，他每天重复了快两年的工作。系统把它量化成了一个数字——而且是从零开始。
+
+也就是说，他过去两年的分拣经验，系统不认。
+
+只算从现在开始的。
+
+第二个包裹。"建设路42号，城东农贸市场对面。"七号网点。扔进去。+1。
+
+第三个。第四个。第五个。
+
+蓝色的数字一次一次地跳动，安静地，在他视野的右下角。他很快发现，如果不去主动关注，这些提示几乎不影响视线，就像手机屏幕角落的信号图标一样，你知道它在，但不会一直盯着看。
+
+七点钟，站里的人陆续到齐了。
+
+分拣区一下子变得嘈杂起来。传送带"哗啦啦"地转，包裹从履带上滚下来，分拣员们埋头扫码、翻面单、扔包裹，动作快的人像是在变戏法。
+
+老周就是其中之一。
+
+林远不止一次观察过老周干活。那是一种近乎本能的效率——包裹到手，眼睛扫一下面单，手腕一抖，包裹就准确地飞进了五六米外的格口，弧线稳得像投篮。整个过程不到两秒。
+
+而林远自己呢？他每个包裹大概要三到四秒。先翻到面单，看清地址，在脑子里想一下是哪个网点，然后走过去放进格口。如果包裹重，他还得双手抱着走过去。
+
+他不会扔。或者说，他每次扔都偏。有一回他试着学老周那样抛包裹，结果砸到了隔壁格口的外沿上，弹到了地上，被站长赵哥说了一顿。从那之后他就老老实实用手放了。
+
+今天他多了一个心思。
+
+在分拣的间隙，他偷偷看了一眼面板。
+
+【包裹分拣 Lv.1 — 87/300】
+
+八十七。一个半小时，八十七个包裹。
+
+他又看了看老周那边。老周的速度大概是他的两倍多，但老周没有面板，老周不知道自己的分拣次数，老周的经验是用八年时间一点一点磨出来的。
+
+而他现在知道了一件事：升到Lv.2需要300。
+
+还差213个。按今天的量，大概中午之前能到。
+
+"小林！发什么呆呢？"
+
+赵哥的声音从传送带那头传过来。赵哥是站长，三十五六岁，圆脸，嗓门大，脾气说不上好也说不上坏，就是永远在催。
+
+"来了赵哥，不好意思。"
+
+林远低下头，继续干活。
+
+他不敢分心了。面板的事可以下班再研究。现在最重要的是——每一个包裹，都是+1。
+
+===
+
+上午十点二十分，第一批货分完了。
+
+赵哥让大家歇十五分钟。林远坐在棚子外面的台阶上，灌了半瓶矿泉水，趁着没人注意，调出了面板。
+
+【林远 — 个人面板】
+
+信息检索 Lv.1 — 2/100
+刀具操作 Lv.1 — 23/200
+俯卧撑 Lv.1 — 21/50
+包裹分拣 Lv.1 — 174/300
+
+一百七十四。一个上午就快过半了。
+
+但他注意到另一个东西——面板上还是只有四个技能。他今天不是只做了分拣这一件事。他骑了电动车，他走路了，他搬了重物，他蹲下站起了无数次。为什么这些没有被记录？
+
+他想了想昨晚呼吸的实验。
+
+也许触发系统的条件不是"做了某个动作"，而是——
+
+"你在干嘛？"
+
+林远吓了一跳，差点把矿泉水洒了。
+
+说话的是一个女生，扎着马尾辫，穿着站里统一的蓝色工服，手里拎着一袋包子。是李萌，站里唯一的女分拣员，比他晚来三个月，但手速比他快。
+
+"没，没干嘛。"林远赶紧在心里关掉了面板。虽然他知道别人应该看不见那些蓝色文字，但那个动作还是像被老师抓到上课看小说一样心虚。
+
+"那你对着空气傻笑什么？"
+
+"我笑了吗？"
+
+"嘴角翘的。"李萌在他旁边坐下，撕开包子的袋子，"吃吗？肉的。路口那家新开的，一块五一个。"
+
+"不用了，我吃过了。"
+
+"馒头？"
+
+"……嗯。"
+
+李萌看了他一眼，没说什么。她咬了一口包子，含含糊糊地说："今天下午还有一车，赵哥说了让加班到八点。"
+
+林远"嗯"了一声。
+
+加班意味着更多包裹，更多包裹意味着更多熟练度。他发现自己竟然对加班这件事产生了一种微妙的、以前从未有过的情绪。
+
+不是期待。但也不是抗拒。
+
+是一种……目的感。
+
+===
+
+下午的活儿比上午更重。
+
+那一车货里有不少大件——净水器、微波炉、显示器。有几个箱子沉得他要用膝盖顶着才能搬起来。到下午四点的时候，他的手套已经磨破了一只，换了备用的。
+
+但数字在涨。
+
+每一个包裹落进格口的时候，视野角落里那个小小的数字就跳一下。从174到200，从200到250，从250到280……
+
+他开始有意识地加快节奏。
+
+以前他分拣的时候，脑子里想的是"还有多少包裹没分完"，那是一个让人越想越绝望的数字，因为包裹永远在来，传送带永远在转。
+
+但现在他的参照系变了。他想的不是"还剩多少"，而是"我已经到了多少"。
+
+280。285。290。
+
+下午五点十二分。
+
+林远拿起一个中等大小的包裹，面单上写着"东风街77号"。四号网点。他走过去，把包裹放进格口。
+
+【包裹分拣 Lv.1 — 300/300】
+
+那行字变成了金色。
+
+【包裹分拣 — 升级！】
+【Lv.1 → Lv.2】
+【下一级：0/500】
+
+然后，一段新的文字出现了：
+
+【Lv.2效果：区域记忆强化（初级）——对已接触过的分拣区域产生轻微的直觉性记忆增强。面单识别速度小幅提升。】
+
+林远站在格口前，愣了三秒。
+
+他的第一反应是：就这？
+
+没有力量暴涨，没有金光环绕，没有浑身舒泰筋脉贯通。一个非常朴素的、甚至有些无聊的增强——"轻微的直觉性记忆增强"。
+
+但他马上拿起了下一个包裹。
+
+面单：青云巷15号。
+
+他的视线扫过那一行字的时候，脑子里几乎没有停顿就蹦出了答案——九号网点。
+
+以前他看到"青云巷"这三个字，需要半秒到一秒的时间去检索记忆：青云巷……在城东北角……属于九号网点的范围。这是一个有意识的、费力的思考过程。
+
+但刚才那一下，不像是"想起来"的。更像是"看见"的。眼睛看到"青云巷"三个字的同时，"九号"这个答案就自动出现在了意识里，像是地址和网点之间接了一根线。
+
+很快。非常细微。但确实变了。
+
+他又分拣了十几个包裹。效果很稳定——对于他熟悉的地址，识别速度明显加快了。那些他分过很多次的街道，现在几乎是看一眼就知道扔到哪儿。
+
+但对于陌生的地址，效果就不明显了。一个他从没见过的小区名字，他还是得想一想，甚至得查一下对照表。
+
+"轻微的直觉性记忆增强"——系统没有夸大。它给的描述是精确的。
+
+林远的心跳快了一些。
+
+不是因为Lv.2的效果有多强。说实话，这个效果放在老周这种八年老手身上可能根本感觉不出区别，因为老周早就靠经验达到了这个水平。
+
+让他心跳加速的是另一件事。
+
+Lv.2升级所需从300涨到了500。那Lv.3呢？Lv.5呢？Lv.10呢？
+
+如果每一级都会带来一个"轻微"的增强，那十个"轻微"加在一起呢？
+
+而且——这只是"包裹分拣"这一个技能。
+
+如果他把"面单识别"单独拆出来练呢？如果他把"搬运"单独练呢？如果他把"投掷准确度"单独练呢？这些行为目前还没有被系统识别为独立技能，但不代表它们不能。
+
+昨晚呼吸没有触发系统，但削苹果触发了。区别在哪里？
+
+林远一边干活一边想。
+
+削苹果是有明确目标的——他想把皮削掉，有成功和失败的区分。呼吸是无意识的，没有"好坏"之分。
+
+如果这个推测成立，那触发条件可能是：有主观意图的、存在"做得好"和"做得差"之差别的行为。
+
+也就是说，系统量化的不是"动作"，而是"技能"。
+
+技能的核心是什么？是可以被改进的行为。
+
+这个念头让他突然兴奋起来。因为它意味着——只要他用心去做一件事，带着"想做好"的意图，系统就可能为它开一个新的熟练度条。
+
+他立刻想到了一个验证方法。
+
+分拣完手头的包裹后，他趁着传送带空档的间隙，走到旁边拿起一个空纸箱，看了看它。
+
+然后他把纸箱放在三米外的地面上，拿起一个小包裹——一个大概巴掌大小、很轻的包裹——瞄准纸箱，扔了出去。
+
+偏了。包裹落在纸箱右边半米的地方。
+
+没有任何提示。
+
+林远想了想。刚才他是"随便扔的"。他甚至没有认真在意自己要扔到哪里。
+
+这一次，他重新拿起那个包裹，认真地盯着纸箱，调整了一下手臂的角度，在心里确认了一下"我要把这个扔进那个箱子里"——然后出手。
+
+还是偏了。但这一次，视野角落跳出了提示。
+
+【检测到行为：定点投掷】
+【定点投掷 Lv.1 — 0/150】
+【+1 熟练度】
+
+他差点笑出声。
+
+有意图，就有记录。
+
+"小林你扔什么呢？"
+
+老周从包裹堆后面探出头来。
+
+"啊……没，手滑了。"林远赶紧把包裹捡起来。
+
+他把这个发现默默记下，继续干活。但他的手指在微微发抖——不是因为累，而是因为他突然意识到这个系统的可能性比他昨晚想象的还要大。
+
+如果意图是开关，那这个世界上有多少种"可以被改进的行为"？
+
+答案是——无穷多。
+
+===
+
+晚上八点十分，加班终于结束了。
+
+林远的腰和胳膊已经完全不属于自己了。他坐在棚子外面的台阶上，花了三分钟才把工服的扣子解开，手指头都是僵的。
+
+老周骑着他那辆破摩托先走了。赵哥在锁门。李萌从旁边经过，看了他一眼。
+
+"你今天好像比平时快了一点。"
+
+林远抬头看她。"真的吗？"
+
+"嗯。下午那会儿，你分那堆小件的时候，比上午明显流畅了。"李萌歪了歪头，"练了什么秘籍？"
+
+"没有。就是……习惯了吧。"
+
+李萌"哦"了一声，没有追问，背着包走了。
+
+林远坐在台阶上，看着她的背影消失在巷子口，然后调出了面板。
+
+【林远 — 个人面板】
+
+信息检索 Lv.1 — 2/100
+刀具操作 Lv.1 — 23/200
+俯卧撑 Lv.1 — 21/50
+包裹分拣 Lv.2 — 38/500
+定点投掷 Lv.1 — 1/150
+
+五个技能了。
+
+其中"包裹分拣"已经Lv.2，下午升级后又分了三十八个。"定点投掷"只试了一次，孤零零的1。
+
+他盯着面板看了很久。
+
+然后他打开了手机的备忘录，开始打字。他需要把今天的发现记录下来，就像做实验一样——
+
+4月7日，系统第一天。
+
+发现1：系统只记录"有主观意图"的行为。纯本能/无意识动作不触发。关键变量可能是"想做好"的意图。
+
+发现2：升级后获得"效果"，目前样本只有一个（包裹分拣Lv.2，区域记忆强化-初级）。效果与技能本身相关，不是随机的。
+
+发现3：不同技能升级所需熟练度不同。俯卧撑50，信息检索100，定点投掷150，刀具操作200，包裹分拣300。规律未知，待观察。
+
+发现4：升级后下一级所需熟练度增加（分拣Lv.1→300，Lv.2→500）。增长曲线未知。
+
+待验证：
+- 同一行为的不同"子行为"能否拆分成独立技能？（如分拣中的搬运、识别、投掷）
+- 技能之间是否存在关联或组合？
+- 是否有隐藏技能？
+- 升级效果是否随等级提升而增强？
+- 到底有没有上限？
+
+【检测到行为：信息检索】
+【信息检索 Lv.1 — 3/100】
+【+1 熟练度】
+
+林远愣了一下。
+
+记笔记也算信息检索？
+
+不对……他回想了一下，"信息检索"这个技能是昨晚搜索引擎查东西的时候触发的。现在他在备忘录里整理信息、归纳规律——这也算吗？
+
+也许"信息检索"这个名字不够准确。也许它的本质是"信息处理"——搜集、整理、分析信息的能力。
+
+他又打了两行字。+1。
+
+有意思。
+
+【信息检索 Lv.1 — 5/100】
+
+林远收起手机，骑上电动车。夜风从两侧吹过来，带着春天特有的那种潮湿的泥土味，还有远处烧烤摊的烟火气。
+
+他骑得很慢，不是因为累，而是因为他在想事情。
+
+以前他每天下班骑车回家的这二十分钟，脑子里要么是空的，要么在想"明天又要搬多少包裹"。那是一种钝的、灰色的疲惫。
+
+今天不一样。
+
+今天他的脑子里有一张表格，有待验证的假设，有明天要做的实验。
+
+他还想到了一件事——
+
+俯卧撑还差29个就满了。
+
+回到出租屋，洗完澡，林远站在那六平米的房间中央。
+
+九点四十分。身体已经很疲惫了。搬了一整天的包裹，胳膊和腰都在抗议。
+
+但是29个。
+
+他趴下去，开始做。
+
+第一个就很费力。身体跟他说不行了，每一根肌肉纤维都在喊停。
+
+但数字跳了。22/50。
+
+第二个。23。
+
+他咬着牙。每一个俯卧撑之间的间隔越来越长，从两秒变成五秒，从五秒变成十秒。到了第三十个的时候，他的手臂在剧烈发抖，汗水滴在地板上，呼吸粗得像拉风箱。
+
+30/50。还差20个。
+
+今天做不完。
+
+他清楚地知道这一点。不是意志力的问题，是肌肉真的到了极限。如果硬撑，受伤的概率比完成的概率大。
+
+林远趴在地板上，胸口紧贴着冰凉的瓷砖，喘了足足两分钟。
+
+然后他慢慢撑起身体，没有再做下一个。
+
+【俯卧撑 Lv.1 — 30/50】
+
+还差20个。
+
+他擦了擦脸上的汗，坐到床边，拿起了那把水果刀和冰箱里最后一个苹果。
+
+如果身体练不动了，就练别的。
+
+他开始削苹果。这次他比昨晚更认真——刻意放慢速度，尽量让果皮保持连续，控制刀刃入肉的深度。每一刀下去他都在观察：这里削深了，那里角度歪了，手腕应该再稳一点。
+
+【刀具操作 Lv.1 — 24/200】
+
+25，26，27……
+
+一个苹果削完了，果皮断了五次，但比昨天的七次少了两次。苹果的形状也没那么坑洼了，至少像个苹果而不是土豆了。
+
+他把削好的苹果切成四块，慢慢吃掉。甜的，汁水很多。超市打折的苹果，一块五一个，但削干净了吃起来跟五块钱的也没区别。
+
+吃完苹果，他看了一眼面板。
+
+【刀具操作 Lv.1 — 35/200】
+
+他把水果刀洗干净，擦干，放回桌上。
+
+然后他躺到床上，关了灯。
+
+黑暗里，他又调出了面板。五个技能，大部分还在Lv.1，数字小得可怜。最高的"包裹分拣"也才Lv.2，效果是"轻微的记忆增强"。
+
+如果让陈嘉豪看到这个面板，大概会笑出来吧——你的人生面板上最强的技能是"快递分拣"？
+
+但林远没有觉得丢人。
+
+因为他发现了一件事。这一整天，从早上六点到现在，将近十六个小时——他没有一刻觉得自己的时间是被浪费的。
+
+以前那种"在传送带上跑却永远跑不到前面"的感觉消失了。
+
+取而代之的是另一种感觉：他在走一条路。很长很长的路，但每一步都有脚印，每一步都在往前。
+
+他看着黑暗中那些淡蓝色的数字，嘴角不自觉地翘了起来。
+
+然后他想到了一件事。
+
+明天是周六。站里轮休，他不用上班。
+
+一整天的空闲时间。
+
+他可以用来做很多实验。
+
+林远闭上眼睛。这一次，他很快就睡着了。`
+}
+];
+
+// ===== 状态管理 =====
+const STATE_KEY = 'novel_reader_state';
+
+function loadState() {
+  try {
+    return JSON.parse(localStorage.getItem(STATE_KEY)) || {};
+  } catch { return {}; }
+}
+
+function saveState(patch) {
+  const state = { ...loadState(), ...patch };
+  localStorage.setItem(STATE_KEY, JSON.stringify(state));
+}
+
+// ===== 初始化 =====
+let currentChapter = 0;
+let fontSize = 17;
+let theme = 'light';
+let barsVisible = true;
+let settingsVisible = false;
+
+function init() {
+  const state = loadState();
+  currentChapter = state.chapter || 0;
+  fontSize = state.fontSize || 17;
+
+  // 首次访问跟随系统暗色偏好
+  if (!state.theme && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    theme = 'dark';
+  } else {
+    theme = state.theme || 'light';
+  }
+
+  applyTheme(theme);
+  applyFontSize(fontSize);
+  renderChapterList();
+  updateContinueBtn();
+}
+
+// ===== 书架 =====
+function renderChapterList() {
+  const state = loadState();
+  const lastRead = state.chapter || 0;
+  const container = document.getElementById('chapterListContainer');
+  container.innerHTML = chapters.map((ch, i) => `
+    <div class="chapter-item" onclick="openChapter(${i})">
+      <span class="ch-title">${ch.title}</span>
+      ${i === lastRead ? '<span class="ch-read">上次读到</span>' : (i < lastRead ? '<span class="ch-read" style="color:var(--text-secondary)">已读</span>' : '')}
+    </div>
+  `).join('');
+}
+
+function updateContinueBtn() {
+  const state = loadState();
+  const ch = state.chapter || 0;
+  const btn = document.getElementById('continueBtn');
+  btn.textContent = ch > 0 ? `继续阅读 · ${chapters[ch].title}` : `开始阅读`;
+}
+
+function continueReading() {
+  const state = loadState();
+  openChapter(state.chapter || 0);
+}
+
+// ===== 阅读 =====
+function openChapter(index) {
+  if (index < 0 || index >= chapters.length) return;
+  currentChapter = index;
+  saveState({ chapter: index });
+
+  const ch = chapters[index];
+  document.getElementById('readerChName').textContent = ch.title;
+
+  // 渲染内容
+  const content = document.getElementById('readerContent');
+  let html = `<h2>${ch.title}</h2>`;
+
+  const paragraphs = ch.content.split('\n').filter(line => line.trim() !== '');
+
+  for (const p of paragraphs) {
+    const trimmed = p.trim();
+    if (trimmed === '===') {
+      html += '<div class="separator">* * *</div>';
+    } else if (trimmed === '——') {
+      html += '<div class="separator">——</div>';
+    } else if (trimmed.startsWith('【') && trimmed.endsWith('】')) {
+      html += `<p class="system-text">${escapeHtml(trimmed)}</p>`;
+    } else if (trimmed.match(/^【/)) {
+      html += `<p class="system-text">${escapeHtml(trimmed)}</p>`;
+    } else {
+      html += `<p>${escapeHtml(trimmed)}</p>`;
+    }
+  }
+
+  html += `<div class="end-mark">— 本章完 —</div>`;
+  content.innerHTML = html;
+
+  // 切换视图
+  document.getElementById('bookshelf').style.display = 'none';
+  document.getElementById('reader').style.display = 'block';
+  document.getElementById('progressBar').style.width = '0%';
+
+  // 更新按钮状态
+  document.getElementById('prevBtn').disabled = (index === 0);
+  document.getElementById('nextBtn').disabled = (index === chapters.length - 1);
+
+  // 恢复滚动位置
+  const state = loadState();
+  const scrollKey = `scroll_${index}`;
+  if (state[scrollKey]) {
+    setTimeout(() => window.scrollTo(0, state[scrollKey]), 50);
+  } else {
+    window.scrollTo(0, 0);
+  }
+
+  barsVisible = true;
+  settingsVisible = false;
+  document.getElementById('settingsPanel').classList.remove('show');
+}
+
+function goBack() {
+  saveScrollPos();
+  document.getElementById('bookshelf').style.display = 'block';
+  document.getElementById('reader').style.display = 'none';
+  document.getElementById('progressBar').style.width = '0%';
+  renderChapterList();
+  updateContinueBtn();
+  window.scrollTo(0, 0);
+}
+
+function prevChapter() { openChapter(currentChapter - 1); }
+function nextChapter() { openChapter(currentChapter + 1); }
+
+// ===== 保存滚动位置 =====
+function saveScrollPos() {
+  saveState({ [`scroll_${currentChapter}`]: window.scrollY });
+}
+
+let scrollTimer;
+window.addEventListener('scroll', () => {
+  // 更新进度条
+  if (document.getElementById('reader').style.display === 'block') {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = docHeight > 0 ? (scrollTop / docHeight * 100) : 0;
+    document.getElementById('progressBar').style.width = progress + '%';
+  }
+
+  clearTimeout(scrollTimer);
+  scrollTimer = setTimeout(saveScrollPos, 300);
+});
+
+// ===== 点击切换顶栏底栏 =====
+document.addEventListener('click', (e) => {
+  if (document.getElementById('reader').style.display !== 'block') return;
+  if (e.target.closest('.reader-topbar, .reader-bottombar, .settings-panel, .nav-btn, .back-btn, .size-btn, .theme-btn')) return;
+
+  barsVisible = !barsVisible;
+  document.getElementById('topbar').classList.toggle('hidden', !barsVisible);
+  document.getElementById('bottombar').classList.toggle('hidden', !barsVisible);
+  if (!barsVisible) {
+    settingsVisible = false;
+    document.getElementById('settingsPanel').classList.remove('show');
+  }
+});
+
+// ===== 设置 =====
+function toggleSettings() {
+  settingsVisible = !settingsVisible;
+  document.getElementById('settingsPanel').classList.toggle('show', settingsVisible);
+}
+
+function changeFontSize(delta) {
+  fontSize = Math.max(14, Math.min(24, fontSize + delta));
+  applyFontSize(fontSize);
+  saveState({ fontSize });
+}
+
+function applyFontSize(size) {
+  document.getElementById('fontSizeVal').textContent = size;
+  document.querySelectorAll('.reader-content p').forEach(p => p.style.fontSize = size + 'px');
+  // 也存到 CSS 变量上，让新渲染的内容也生效
+  document.documentElement.style.setProperty('--reader-font-size', size + 'px');
+}
+
+function setTheme(t) {
+  theme = t;
+  applyTheme(t);
+  saveState({ theme: t });
+}
+
+function applyTheme(t) {
+  document.body.className = t === 'light' ? '' : t;
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.theme === t);
+  });
+  updateNightIcon(t);
+}
+
+function toggleNight() {
+  if (theme === 'dark') {
+    // 切回上次的非暗黑主题，默认米黄
+    const state = loadState();
+    const prev = state.prevTheme || 'light';
+    setTheme(prev);
+  } else {
+    saveState({ prevTheme: theme });
+    setTheme('dark');
+  }
+}
+
+function updateNightIcon(t) {
+  const icon = document.getElementById('nightIcon');
+  if (icon) icon.textContent = t === 'dark' ? '☀️' : '🌙';
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// ===== 启动 =====
+init();
+</script>
+</body>
+</html>
