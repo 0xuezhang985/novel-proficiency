@@ -5035,7 +5035,7 @@ function openChapter(index) {
       if (parts.length === 2) {
         const name = parts[0].trim();
         const val = parts[1].trim();
-        const nums = val.match(/(\\d+)\\/(\\d+)/);
+        const nums = val.match(/(\d+)\/(\d+)/);
         const pct = nums ? (parseInt(nums[1]) / parseInt(nums[2]) * 100) : 0;
         html += `<div class="stat-bar"><span class="stat-name">${escapeHtml(name)}</span><div class="stat-track"><div class="stat-fill" style="width:${pct}%"></div></div><span class="stat-val">${escapeHtml(val)}</span></div>`;
       }
